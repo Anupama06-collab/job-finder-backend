@@ -17,7 +17,12 @@ mongoose
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
 // Test route
-app.get("/", (req, res) => {
+app.get("/api/jobs", (req, res)  => {
+     res.json([
+    { id: 1, title: "Software Engineer", company: "Google", location: "Bangalore" },
+    { id: 2, title: "Data Scientist", company: "Microsoft", location: "Hyderabad" },
+    { id: 3, title: "Frontend Developer", company: "Amazon", location: "Remote" }
+  ]);
   res.send("Job Finder Backend Running 🚀");
 });
 
