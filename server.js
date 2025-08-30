@@ -1,35 +1,58 @@
-// backend/server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGO_URI, {
+    dbName: "jobFinder",
+  })
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// Test route
-app.get("/api/jobs", (req, res)  => {
-     res.json([
-    { id: 1, title: "Software Engineer", company: "Google", location: "Bangalore" },
-    { id: 2, title: "Data Scientist", company: "Microsoft", location: "Hyderabad" },
-    { id: 3, title: "Frontend Developer", company: "Amazon", location: "Remote" }
-  ]);
-  res.send("Job Finder Backend Running 🚀");
+// Job Schema
+const jobSchema = new mongoose.Schema({
+  title: String,
+  company: String,
+  location: String,
+  description: String,
 });
 
-// Routes (we’ll add in next step)
-const jobRoutes = require("./routes/jobRoutes");
-app.use("/api/jobs", jobRoutes);
+const Job = mongoose.model("Job", jobSchema);
+
+// Default route
+app.get("/", (req, res) => {
+  res.send("🚀 Job Finder API is running...");
+});
+
+// Route to get all jobs
+app.get("/jobs", async (req, res) => {
+  try {
+    const jobs = await Job.find();
+    res.json(jobs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Add a job (for testing)
+app.post("/jobs", async (req, res) => {
+  try {
+    const newJob = new Job(req.body);
+    await newJob.save();
+    res.status(201).json(newJob);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
 
 // Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
